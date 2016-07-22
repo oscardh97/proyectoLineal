@@ -21,7 +21,7 @@ function Matriz(firstParameter, columnas, elementos) {
 	}
 
 	this.obtenerFilas = function() {
-		return JSON.parse(JSON.stringify((elementos));
+		return JSON.parse(JSON.stringify(elementos));
 	}
 	this.obtenerFilas = function() {
 		return filas;
