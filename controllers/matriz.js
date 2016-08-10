@@ -1,17 +1,5 @@
 function Matriz(firstParameter, columnas, elementos) {
-	var filas, elementos;
-	if (Array.isArray(firstParameter)) {
-		filas = undefined;
-		columnas = undefined;
-		this.setElementos(firstParameter);
-	} else {
-		filas = firstParameter;
-		if (elementos !== undefined) {
-			this.setElementos(firstParameter);
-		} else {
-			elementos = [[]];
-		}
-	}
+	
 
 	this.obtenerTamanio = function() {
 		return {
@@ -54,40 +42,143 @@ function Matriz(firstParameter, columnas, elementos) {
 	}
 
 	this.setElementos = function() {
+		var _self = this;
 		if (this.validarMatriz()) {
-			filas = elementos.length;
-			columnas = elementos[0].length;
+			this.filas = this.elementos.length;
+			this.columnas = this.elementos[0].length;
+			this.elementos.forEach(function(fila, indexF) {
+				fila.forEach(function(elemento, index) {
+					if (typeof(elemento) === "string") {
+						if (elemento.indexOf('/') !== -1) {
+							_self.elementos[indexF][index] = new fraccion(elemento.split("/")[0], elemento.split("/")[1]); 
+						}
+					} else {
+						// console.log(elemento)
+						_self.elementos[indexF][index] = new fraccion(elemento); 
+					}
+				});
+			});
 		} else {
-			elementos = undefined;
+			this.elementos = undefined;
 			throw "NO SE PUDIERON AGREGAR LOS ELEMENTOS. MATRIZ INVALIDA"
 		}
 	}
 
 	this.validarMatriz = function() {
 
-		if (elementos === undefined) {
+		if (this.elementos === undefined) {
 			return false;
 		}
 
 		var tempColumnas = columnas;
-		if (columnas === undefined) {
-			if (elementos[0] !== undefined) {
-				elementos[0] = [];
+		if (this.columnas === undefined) {
+			if (this.elementos[0] === undefined) {
+				this.elementos[0] = [];
 			}
-			tempColumnas = elementos[0].length;
+			tempColumnas = this.elementos[0].length;
 		}
 
 
-		if (filas !== undefined && filas !== elementos.length) {
+		if (this.filas !== undefined && this.filas !== this.length) {
 			return false;
 		}
 
-		for (var i = 0; i < elementos.length; i++) {
-			if (elementos[i].length !== tempColumnas) {
+		for (var i = 0; i < this.elementos.length; i++) {
+			if (this.elementos[i].length !== tempColumnas) {
 				return false;
 			}
 		}
 		return true;
 	}
 
+	this.cambiarReglon = function(R1, R2) {
+		this.elementos[R1] = JSON.parse(JSON.stringify(this.elementos[R2]));
+		this.elementos[R2] = JSON.parse(JSON.stringify(this.elementos[R1]));
+	}
+
+	this.volverUno = function(reglon) {
+		var _self = this;
+		if (this.elementos[reglon][reglon].equals(1)) {
+			return;
+		}
+		if (this.elementos[reglon][reglon].equals(-1)) {
+			this.elementos[reglon][reglon] = PRODUCTO(this.elementos[reglon][reglon], -1);
+			return;
+		}
+		if (this.elementos[reglon][reglon].esNegativa()) {
+			this.elementos[reglon][reglon].multiplicar(-1);
+		}
+		var primeraEntrada = this.elementos[reglon][reglon];
+		// console.log(primeraEntrada)
+		this.elementos[reglon].forEach(function(elemento, index) {
+			elemento.dividir(primeraEntrada)
+			_self.elementos[reglon][index] = new fraccion(elemento);
+			// console.log(elemento)
+		});
+
+	}
+	this.resolverSistema = function() {
+		var _self = this;
+		//RECORRER EN BUSCA DE UN UNO EN LA PRIMERA POSICION
+		// _self.elementos.forEach(function(reglon, index) {
+		// 	if (reglon[0] === 1) {
+		// 		_self.cambiarReglon(index, 0);
+		// 		return false;
+		// 	}
+		// });
+		_self.elementos.forEach(function(reglon, index) {
+			console.log(_self.toString());
+
+			_self.volverUno(index);
+			console.log(_self.toString());
+			_self.columnaACero(index);
+		});
+
+
+	}
+
+	this.columnaACero = function(reglon) {
+		for (var i = 0; i < this.elementos.length; i++) {
+			if (i === reglon) {
+				continue;
+			}
+			var primeraEntrada = new fraccion(this.elementos[i][reglon]);
+			console.log("R" + (i + 1) + " - " + primeraEntrada + " * R" + (reglon + 1))
+			for (var j = 0; j < this.elementos[reglon].length; j++) {
+				// console.log("PRIMER => " + primeraEntrada.toString())
+				var operacion = primeraEntrada.esNegativa() ? "sumar" : "restar" ;
+				this.elementos[i][j][operacion](PRODUCTO(primeraEntrada, this.elementos[reglon][j]));
+				// console.log(this.elementos[i][j].toString())
+			}
+		}
+	}
+
+	var filas, elementos;
+	if (Array.isArray(firstParameter)) {
+		this.filas = undefined;
+		this.columnas = undefined;
+		console.log(JSON.parse(JSON.stringify(firstParameter)));
+
+		this.elementos = JSON.parse(JSON.stringify(firstParameter));
+		console.log(elementos)
+		this.setElementos();
+	} else {
+		this.filas = firstParameter;
+		if (elementos !== undefined) {
+			this.setElementos(firstParameter);
+		} else {
+			this.elementos = [[]];
+		}
+	}
+	this.toString = function() {
+		var string = "";
+		this.elementos.forEach(function(fila) {
+			string += "[";
+			fila.forEach(function(elemento) {
+				string += elemento.toString() + ","
+			})
+			string += "]\n";
+		});
+		return string;
+	}
 }

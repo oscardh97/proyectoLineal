@@ -11,6 +11,18 @@ SUMAR = function(n1, n2) {
 	return retVal;
 }
 
+RESTAR = function(n1, n2) {
+	if (!isNaN(n1)) {
+		n1 = new fraccion(n1,1);
+	}
+	if (!isNaN(n2)) {
+		n2 = new fraccion(n2,1);
+	}
+	var retVal = new fraccion(-n1.numerador, n1.denominador);
+	retVal.sumar(n2);
+	return retVal;
+}
+
 DIVIDIR = function(n1, n2) {
 	if (!isNaN(n1)) {
 		n1 = new fraccion(n1,1);
@@ -24,20 +36,21 @@ DIVIDIR = function(n1, n2) {
 }
 		
 PRODUCTO = function(n1, n2) {
-	if (!isNaN(n1)) {
+	// if (!isNaN(n1)) {
 		n1 = new fraccion(n1,1);
-	}
-	if (!isNaN(n2)) {
+	// }
+	// if (!isNaN(n2)) {
 		n2 = new fraccion(n2,1);
-	}
-	var retVal = new fraccion(n1.numerador, n1.denominador);
-	retVal.multiplicar(n2);			
-	return retVal;
+	// }
+	// var retVal = new fraccion(n1.numerador, n1.denominador);
+	// console.log(n1.toString() + " * " + n2.toString())
+	n1.multiplicar(n2);			
+	return n1;
 }
 
 
 
-Number.prototype.sumar = function() {
+Number.prototype.sumar = function() { 
 	var _self = this;
 	valores.forEach(function(valor) {
 		if (!isNaN(valor)) {
