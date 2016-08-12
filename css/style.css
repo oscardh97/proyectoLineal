@@ -1,0 +1,16 @@
+body{
+	padding-top: 70px;
+}
+.matriz{
+	width: auto;
+	height: auto;
+	margin: 10px;
+}
+.elemento {
+	width: 30px;
+	border: 1px solid;
+}
+.change {
+	width: 150px;
+	border: 1px solid;
+}

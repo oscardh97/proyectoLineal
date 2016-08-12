@@ -18,9 +18,21 @@
 		}
 		this.simplify = function(){
 			// console.log(this.numerador, this.denominador)/
+			// console.log(this.toString());
+			if (isNaN(this.numerador) || isNaN(this.numerador)) {
+				// console.log(this)
+				return
+			}
+			if (this.numerador === 0 || this.numerador === 0) {
+				return;
+			}
 			var mcd = Math.abs(this.gcd(this.numerador, this.denominador));
 			this.numerador /= mcd;
 			this.denominador /= mcd;
+			if (this.numerador < 0 && this.denominador < 0) {
+				this.numerador = -this.numerador;
+				this.denominador = -this.denominador;
+			}
 		}
 
 		this.sumar = function(n) {
@@ -48,14 +60,17 @@
 				n = new fraccion(n,1);
 			}
 
-			this.numerador *= this.denominador;
-			this.denominador *= this.numerador;
+			this.numerador *= n.denominador;
+			this.denominador *= n.numerador;
 			this.simplify();
 		}
 
 		this.toString = function() {
+			if (this.numerador === 0) {
+				return 0;
+			}
 			if (Math.abs(this.denominador) === 1) {
-				return (this.numerador / this.denominador < 0 ? "-" : "") + Math.abs(this.numerador);
+				return (this.esNegativa() ? "-" : "") + Math.abs(this.numerador);
 			}
 			return this.numerador + "/" + this.denominador;
 		}
@@ -78,18 +93,19 @@
 		if (numerador instanceof fraccion) {
 			this.numerador = numerador.numerador;
 			this.denominador = numerador.denominador;
+			// console.log(this)
 			this.simplify();
-		} 
-		if (numerador === undefined && denominador === undefined) {
+		} else if (numerador === undefined && denominador === undefined) {
 			this.esNula = true;
-		} else if (denominador !== 0) {
+		} else { //if (denominador !== 0) {
 			if (denominador === undefined)
 				denominador = 1;
 			this.numerador = numerador;
 			this.denominador = denominador;
 			this.simplify();
-		} else {
-			throw "EL DENOMINADOR NO PUEDE SER CERO";
-		}
+		} 
+		// else {
+		// 	throw "EL DENOMINADOR NO PUEDE SER CERO";
+		// }
 	 	// this.view = $("../views/matriz.html")
 	}

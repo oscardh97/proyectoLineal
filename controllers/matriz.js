@@ -53,7 +53,6 @@ function Matriz(firstParameter, columnas, elementos) {
 							_self.elementos[indexF][index] = new fraccion(elemento.split("/")[0], elemento.split("/")[1]); 
 						}
 					} else {
-						// console.log(elemento)
 						_self.elementos[indexF][index] = new fraccion(elemento); 
 					}
 				});
@@ -98,24 +97,22 @@ function Matriz(firstParameter, columnas, elementos) {
 
 	this.volverUno = function(reglon) {
 		var _self = this;
+		var changes = {};
 		if (this.elementos[reglon][reglon].equals(1)) {
 			return;
 		}
 		if (this.elementos[reglon][reglon].equals(-1)) {
+			changes[reglon] = "R" + (reglon + 1) + "-> -R" + (reglon + 1)
 			this.elementos[reglon][reglon] = PRODUCTO(this.elementos[reglon][reglon], -1);
-			return;
+			return changes;
 		}
-		if (this.elementos[reglon][reglon].esNegativa()) {
-			this.elementos[reglon][reglon].multiplicar(-1);
-		}
-		var primeraEntrada = this.elementos[reglon][reglon];
-		// console.log(primeraEntrada)
+		var primeraEntrada = new fraccion(this.elementos[reglon][reglon]);
+		changes[reglon] = "R" + (reglon + 1) + "-> R" + (reglon + 1) + " / " + primeraEntrada.toString();
 		this.elementos[reglon].forEach(function(elemento, index) {
-			elemento.dividir(primeraEntrada)
-			_self.elementos[reglon][index] = new fraccion(elemento);
-			// console.log(elemento)
+			elemento.dividir(primeraEntrada);
+			_self.elementos[reglon][index] = new fraccion(elemento.numerador, elemento.denominador);
 		});
-
+		return changes;
 	}
 	this.resolverSistema = function() {
 		var _self = this;
@@ -127,30 +124,35 @@ function Matriz(firstParameter, columnas, elementos) {
 		// 	}
 		// });
 		_self.elementos.forEach(function(reglon, index) {
-			console.log(_self.toString());
 
-			_self.volverUno(index);
-			console.log(_self.toString());
-			_self.columnaACero(index);
+			// console.log(_self.toString());
+			var changes = _self.volverUno(index);
+			console.log(_self.toString(changes));
+			var changes2 = _self.columnaACero(index);
+			console.log(_self.toString(changes2));
 		});
+		console.log(_self.toString());
 
 
 	}
 
 	this.columnaACero = function(reglon) {
+		var changes = {};
 		for (var i = 0; i < this.elementos.length; i++) {
 			if (i === reglon) {
 				continue;
 			}
-			var primeraEntrada = new fraccion(this.elementos[i][reglon]);
-			console.log("R" + (i + 1) + " - " + primeraEntrada + " * R" + (reglon + 1))
+			var primeraEntrada = new fraccion(this.elementos[i][reglon].numerador, this.elementos[i][reglon].denominador);
+			var operacion = primeraEntrada.esNegativa() ? "sumar" : "restar" ;
+			changes[i] = "R" + (i + 1) + "-> R" + (i + 1) + " - " + primeraEntrada.toString() + " * R" + (reglon + 1);
 			for (var j = 0; j < this.elementos[reglon].length; j++) {
-				// console.log("PRIMER => " + primeraEntrada.toString())
-				var operacion = primeraEntrada.esNegativa() ? "sumar" : "restar" ;
+				if (primeraEntrada.esNegativa() && this.elementos[i][j].esNegativa()) {
+					this.elementos[i][j].multiplicar(-1);
+				}
 				this.elementos[i][j][operacion](PRODUCTO(primeraEntrada, this.elementos[reglon][j]));
-				// console.log(this.elementos[i][j].toString())
 			}
 		}
+		return changes;
 	}
 
 	var filas, elementos;
@@ -170,7 +172,7 @@ function Matriz(firstParameter, columnas, elementos) {
 			this.elementos = [[]];
 		}
 	}
-	this.toString = function() {
+	this.toString = function(changes) {
 		var string = "";
 		this.elementos.forEach(function(fila) {
 			string += "[";
@@ -179,6 +181,26 @@ function Matriz(firstParameter, columnas, elementos) {
 			})
 			string += "]\n";
 		});
+		this.toHMTL(changes);
 		return string;
+	}
+
+	this.toHMTL = function(changes) {
+
+		var doomElement = $("<div class='matriz'><div>");
+		var table = $("<table></table>")
+		this.elementos.forEach(function(fila, index) {
+			// string += "[";
+			var row = $("<tr></tr>")
+			if (changes) {
+				row.append("<td class='change'>" + (changes[index] || ' ') + "</td>");
+			}
+			fila.forEach(function(elemento) {
+				row.append("<td class='elemento'>" + elemento.toString() + "</td>");
+			})
+			table.append(row);
+		});
+		doomElement.append(table);
+		$(".container").append(doomElement)
 	}
 }
