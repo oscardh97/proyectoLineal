@@ -2,13 +2,33 @@ body{
 	padding-top: 70px;
 }
 .matriz{
-	width: auto;
-	height: auto;
 	margin: 10px;
+	float: left;
+	padding: 10px;
+	border: 2px solid #D2D2F1;
+}
+.matrices{
+	width: 100%;
+	float: left;
+}
+#operation{
+	width: 80%;
+}
+.matriz > input{
+	width: 50px !important;
+}
+.matriz > table{
+	margin-top: 5px;
 }
 .elemento {
 	width: 30px;
 	border: 1px solid;
+}
+
+.elemento > input {
+	width: 100%;
+	border: none;
+	text-align: center;
 }
 .change {
 	width: 150px;

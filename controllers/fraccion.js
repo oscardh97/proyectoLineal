@@ -37,7 +37,13 @@
 
 		this.sumar = function(n) {
 			if (!isNaN(n)) {
+				if (n === 0) {
+					return;
+				}
 				n = new fraccion(n,1);
+			}
+			if (n.numerador === 0) {
+				return;
 			}
 			this.numerador = this.numerador * n.denominador + this.denominador * n.numerador;
 			this.denominador *= n.denominador;
@@ -98,6 +104,11 @@
 		} else if (numerador === undefined && denominador === undefined) {
 			this.esNula = true;
 		} else { //if (denominador !== 0) {
+			if (isNaN(numerador)) {
+				denominador = numerador.split("/")[1];
+				numerador = numerador.split("/")[0];
+				console.log(denominador)
+			}
 			if (denominador === undefined)
 				denominador = 1;
 			this.numerador = numerador;

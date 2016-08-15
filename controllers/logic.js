@@ -52,18 +52,20 @@ PRODUCTO = function(n1, n2) {
 
 
 Number.prototype.sumar = function() { 
-	var _self = this;
-	valores.forEach(function(valor) {
-		if (!isNaN(valor)) {
-			_self += valor;
-		} else if (valor instanceof fraccion) {
-			if (valor.esEntera()) {
-				_self += valor.numerador;
+	var _self = this
+	console.log(arguments)
+	for (var i = 0; i < arguments.length; i++) {
+
+		if (!isNaN(arguments[i])) {
+			_self += arguments[i];
+		} else if (arguments[i] instanceof fraccion) {
+			if (arguments[i].esEntera()) {
+				_self += arguments[i].numerador;
 			} else {
-				SUMAR(valor, _self);
+				_self = SUMAR(arguments[i], _self);
 			}
 		}
-	});
+	}
 	return this;
 }
 

@@ -8,31 +8,32 @@
 	<script type="text/javascript" src="../controllers/fraccion.js"></script>
 	<script type="text/javascript" src="../controllers/matriz.js"></script>
 	<script type="text/javascript" src="../controllers/bootstrap.min.js"></script>
+	<script type="text/javascript" src="../controllers/index.js"></script>
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
 </head>
 <body>
-	<nav class="navbar navbar-inverse navbar-fixed-top">
-	</nav>
+	<ul class="nav nav-tabs">
+  		<li role="presentation" id="btnAgregarMatriz">
+  			<a href="#">
+  				Agregar Matriz
+  			</a>
+  		</li>
+  		<li role="presentation" class="dropdown">
+  			<!-- <a href="#">Crear Matriz</a> -->
+		    <<!-- a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+		      Dropdown <span class="caret"></span>
+		    </a> -->
+		    <!-- <ul class="dropdown-menu">
+		      ...
+		    </ul> -->
+		</li>
+	</ul>
 	<div class="container theme-showcase" role="main">
-		<!-- <div class="matriz">
-			<table>
-				<tbody>
-					<tr>
-						<td class="elemento">
-							<input class="elemento" type="text" name="a11">
-						</td>
-						<td class="elemento">
-							<input class="elemento" type="text" name="a11">
-						</td>
-						<td class="elemento">
-							<input class="elemento" type="text" name="a11">
-						</td>
-					</tr>
-				</tbody>
-			</table>
-			
-		</div> -->
+		<div class="matrices" id="originales"></div>
+		<input type="text" id="operation">
+		<button id="btnOperar">Operar</button>
+		<div class="matrices" id="resultados"></div>
 	</div>
 </body>
 </html>
