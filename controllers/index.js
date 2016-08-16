@@ -83,40 +83,48 @@ var proccesString2 = function(string) {
 }
 
 var SUMAR_MATRICES = function(lMatriz, rMatriz) {
-	var newId = getNextChar();
-	matrices[newId] = new Matriz(lMatriz);
-	matrices[newId].setId(newId);
-	matrices[newId].sumar(rMatriz);
-	$("#resultados").append(matrices[newId].toHTML());
-	return matrices[newId];
+	var newId = lMatriz.id + "+" + rMatriz.id;
+	nMatrix = new Matriz(lMatriz);
+	nMatrix.setId(newId);
+	nMatrix.sumar(rMatriz);
+	$("#resultados").append(nMatrix.toHTML());
+	return nMatrix;
 }
 var MULTIPLICAR_MATRICES = function(lMatriz, rMatriz) {
-	var newId = getNextChar();
+	var newId = lMatriz.id + "*" + rMatriz.id;
+	var nMatrix;
 	if (!isNaN(lMatriz)) {
 		lMatriz = new fraccion(lMatriz);
-		matrices[newId] = new Matriz(rMatriz);
-		matrices[newId].multiplicar(lMatriz);
+		nMatrix = new Matriz(rMatriz);
+		nMatrix.multiplicar(lMatriz);
 	} else {
-		matrices[newId] = new Matriz(lMatriz);
-		matrices[newId].multiplicar(rMatriz);
+		nMatrix = new Matriz(lMatriz);
+		nMatrix.multiplicar(rMatriz);
 	}
-	matrices[newId].setId(newId);
-	$("#resultados").append(matrices[newId].toHTML());
-	return matrices[newId];
+	nMatrix.setId(newId);
+	$("#resultados").append(nMatrix.toHTML());
+	return nMatrix;
 }
 
 var proccesString = function(cadena) {
    	var testArray = cadena.split("+");
 	var total = 0;
+	var _self = this;
 	// for(String ele : testArray){
 	testArray.forEach(function(ele, index) {
 		var multiplicaciones = ele.split("*");
 	   	if (multiplicaciones.length > 1) {
+	   		if (multiplicaciones[0].indexOf("TRANS") !== -1) {
+	   			_self.tieneTranspuesta(multiplicaciones[0]);
+	   		}
 	   		var totalMulti = matrices[multiplicaciones[0]];
          	multiplicaciones.forEach(function(multiplicacion, indexM) {
          		if (indexM === 0) {
          			return;
          		}
+		   		if (multiplicacion.indexOf("TRANS") !== -1) {
+		   			_self.tieneTranspuesta(multiplicacion);
+		   		}
 				totalMulti = MULTIPLICAR_MATRICES(totalMulti, matrices[multiplicacion]);
          	});
          	if (total === undefined) {
@@ -126,16 +134,38 @@ var proccesString = function(cadena) {
          	}
 	   	} else {
 	   		if (index === 0) {
+		   		if (multiplicaciones[0].indexOf("TRANS") !== -1) {
+		   			_self.tieneTranspuesta(multiplicaciones[0]);
+		   		}
 	   			total = matrices[multiplicaciones[0]];
 	   			console.log(total.toString())
 	   			return;
 	   		}
 	   	}
-		if (testArray.length > 1)
+		if (testArray.length > 1) {
+	   		if (testArray[index].indexOf("TRANS") !== -1) {
+	   			_self.tieneTranspuesta(testArray[index]);
+	   		}
 			total = SUMAR_MATRICES(total, matrices[testArray[index]]);
+		}
 		
 	});
 	$("#resultados").append(total.toHTML());
 	return total;   
+}
+
+this.tieneTranspuesta = function(cadena) {
+
+	if (cadena.indexOf("TRANS(") !== -1) {
+		var index = cadena.indexOf("TRANS(");
+		var newId = cadena.substring(index + 6, index + 7);
+		if (matrices.hasOwnProperty(newId)) {
+			matrices["TRANS(" + newId + ")"] = matrices[newId].transpuesta();
+			matrices["TRANS(" + newId + ")"].setId("TRANS(" + newId + ")");
+			$("#resultados").append(matrices["TRANS(" + newId + ")"].toHTML());
+		} else {
+			throw "NO EXISTE LA MATRIZ";
+		}
+	}
 }
         

@@ -116,16 +116,20 @@ function Matriz(firstParameter, id) {
 			return;
 		}
 		if (this.elementos[reglon][reglon].equals(-1)) {
-			changes[reglon] = "R" + (reglon + 1) + "-> -R" + (reglon + 1)
+			var idChange = "R" + (reglon + 1) + "-> R" + (reglon + 1) + " / " + primeraEntrada.toString();
+			changes[idChange] = new Matriz(this);
+			changes[idChange].setId(idChange);
 			this.elementos[reglon][reglon] = PRODUCTO(this.elementos[reglon][reglon], -1);
 			return changes;
 		}
 		var primeraEntrada = new fraccion(this.elementos[reglon][reglon]);
-		changes[reglon] = "R" + (reglon + 1) + "-> R" + (reglon + 1) + " / " + primeraEntrada.toString();
 		this.elementos[reglon].forEach(function(elemento, index) {
 			elemento.dividir(primeraEntrada);
 			_self.elementos[reglon][index] = new fraccion(elemento.numerador, elemento.denominador);
 		});
+		var idChange = "R" + (reglon + 1) + "-> R" + (reglon + 1) + " / " + primeraEntrada.toString();
+		changes[idChange] = new Matriz(this);
+		changes[idChange].setId(idChange);
 		return changes;
 	}
 	this.resolverSistema = function() {
@@ -137,17 +141,37 @@ function Matriz(firstParameter, id) {
 		// 		return false;
 		// 	}
 		// });
+		allChanges = [];
 		_self.elementos.forEach(function(reglon, index) {
-
+			console.log(reglon[index])
+			if (reglon[index].equals(0)) {
+				console.log(index)
+				_self.elementos.forEach(function (subReglon, subIndex) {
+					if (subIndex <= index) {
+						return;
+					}
+					if (!subReglon[subIndex].equals(0)) {
+						console.log(index, subIndex)
+						_self.cambiarReglon(reglon, subReglon);
+						return false;
+					}
+				});
+			}
 			// console.log(_self.toString());
 			var changes = _self.volverUno(index);
 			console.log(_self.toString(changes));
 			var changes2 = _self.columnaACero(index);
 			console.log(_self.toString(changes2));
+			if (changes2)
+				allChanges.push(changes2)
 		});
 		console.log(_self.toString());
 
-
+		allChanges.forEach(function(ele) {
+			$.each(ele, function(index, matrix) {
+		    	$("#resultados").append(matrix.toHTML());
+			 })
+		});
 	}
 
 	this.columnaACero = function(reglon) {
@@ -158,15 +182,21 @@ function Matriz(firstParameter, id) {
 			}
 			var primeraEntrada = new fraccion(this.elementos[i][reglon].numerador, this.elementos[i][reglon].denominador);
 			var operacion = primeraEntrada.esNegativa() ? "sumar" : "restar" ;
-			changes[i] = "R" + (i + 1) + "-> R" + (i + 1) + " - " + primeraEntrada.toString() + " * R" + (reglon + 1);
 			for (var j = 0; j < this.elementos[reglon].length; j++) {
 				if (primeraEntrada.esNegativa() && this.elementos[i][j].esNegativa()) {
 					this.elementos[i][j].multiplicar(-1);
 				}
 				this.elementos[i][j][operacion](PRODUCTO(primeraEntrada, this.elementos[reglon][j]));
 			}
+			var idChange = "R" + (i + 1) + "-> R" + (i + 1) + " - " + primeraEntrada.toString() + " * R" + (reglon + 1);
+			changes[idChange] = new Matriz(this);
+			changes[idChange].setId(idChange);
 		}
 		return changes;
+	}
+
+	this.reducir = function() {
+
 	}
 
 	this.toString = function(changes) {

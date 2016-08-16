@@ -15,7 +15,7 @@ body{
 	width: 80%;
 }
 .matriz > input{
-	width: 50px !important;
+	width: auto !important;
 }
 .matriz > table{
 	margin-top: 5px;
