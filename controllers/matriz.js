@@ -22,12 +22,14 @@ function Matriz(firstParameter, id) {
 	this.eliminarFila = function(index) {
 		this.elementos.splice(index, 1);
 		this.filas--;
+		this.validarIdentidad();
 	};
 	this.agregarFila = function(nuevaFila, index) {
 		console.log(arguments)
 		if (nuevaFila.length === this.columnas) {
 			this.elementos.splice(index + 1, 0, nuevaFila);
 			this.filas++;
+			this.validarIdentidad();
 			return true;
 		} else {
 			throw "LA FILA NO TIENE EL TAMAÑO CORRECTO";
@@ -40,7 +42,8 @@ function Matriz(firstParameter, id) {
 			for (var i = 0; i < nuevaColumna.length; i++) {
 				this.elementos[i].splice(index + 1, 0, new fraccion(nuevaColumna[i]));
 			}
-			this.columnas++;	
+			this.columnas++;
+			this.validarIdentidad();	
 			return true;
 		} else {
 			throw "LA COLUMNA NO TIENE EL TAMAÑO CORRECTO";
@@ -53,8 +56,27 @@ function Matriz(firstParameter, id) {
 			this.elementos[i].splice(index , 1);
 		}
 		this.columnas--;
+		this.validarIdentidad();
 	}
-
+	this.validarIdentidad = function() {
+		var _self = this;
+		if (this.id.indexOf("INVERSA") !== -1) {
+			return;
+		}
+		_self.esCuadrada = _self.filas === _self.columnas;
+		if (_self.esCuadrada) {
+			_self.identidad = [];
+			_self.elementos.forEach(function(fila, indexF) {
+				_self.identidad.push([]);
+				fila.forEach(function(elemento, index) {
+					console.log(indexF === index ? 1 : 0)
+					_self.identidad[indexF][index] = indexF === index ? 1 : 0;
+				});
+			});
+			this.identidad = new Matriz(_self.identidad, "INVERSA(" + this.id + ")");
+			// this.identidad.setId();
+		}
+	}
 	this.setElementos = function() {
 		var _self = this;
 		if (this.validarMatriz()) {
@@ -71,6 +93,7 @@ function Matriz(firstParameter, id) {
 					}
 				});
 			});
+			_self.validarIdentidad();
 		} else {
 			this.elementos = undefined;
 			throw "NO SE PUDIERON AGREGAR LOS ELEMENTOS. MATRIZ INVALIDA"
@@ -105,13 +128,24 @@ function Matriz(firstParameter, id) {
 	}
 
 	this.cambiarReglon = function(R1, R2) {
-		this.elementos[R1] = JSON.parse(JSON.stringify(this.elementos[R2]));
-		this.elementos[R2] = JSON.parse(JSON.stringify(this.elementos[R1]));
+		console.log(R1, R2);
+
+		for (var i = 0; i < this.columnas; i++) {
+			var temp = new fraccion(this.elementos[R1][i].toString()); 
+			console.log( i + " - " +temp.toString() + " - " + this.elementos[R2][i].toString())
+			this.elementos[R1][i] = new fraccion(this.elementos[R2][i].toString());
+			this.elementos[R2][i] = new fraccion(temp);
+			console.log(this.elementos[0][i].toString())
+		}
+		console.log(this.elementos[0][0].toString())
+		// this.actualizar();
+		console.log(this.toString());
 	}
 
 	this.volverUno = function(reglon) {
 		var _self = this;
 		var changes = {};
+		var invertChanges = {};
 		if (this.elementos[reglon][reglon].equals(1)) {
 			return;
 		}
@@ -130,6 +164,9 @@ function Matriz(firstParameter, id) {
 		var idChange = "R" + (reglon + 1) + "-> R" + (reglon + 1) + " / " + primeraEntrada.toString();
 		changes[idChange] = new Matriz(this);
 		changes[idChange].setId(idChange);
+		idChange = "INVERSA (" + idChange + ")";
+		changes[idChange] = new Matriz(this.parent.identidad);
+		changes[idChange].setId(idChange);
 		return changes;
 	}
 	this.resolverSistema = function() {
@@ -142,54 +179,93 @@ function Matriz(firstParameter, id) {
 		// 	}
 		// });
 		allChanges = [];
-		_self.elementos.forEach(function(reglon, index) {
-			console.log(reglon[index])
-			if (reglon[index].equals(0)) {
-				console.log(index)
-				_self.elementos.forEach(function (subReglon, subIndex) {
-					if (subIndex <= index) {
-						return;
+		// _self.elementos.forEach(function(reglon, index) {
+		this.reducida = new Matriz(_self);
+		this.reducida.setId("REDUCIDA(" + _self.id + ")");
+		this.reducida.parent = this;
+		this.reducida.validarIdentidad();
+		var test = 0;
+		for (var i = 0; i < _self.reducida.elementos.length; i++) {
+			console.log(_self.reducida.elementos[i][i])
+			var tieneCero = false;
+			if (_self.reducida.elementos[i][i].equals(0)) {
+				console.log(i)
+				for (var j = i + 1; j < _self.reducida.elementos.length; j++) {
+					console.log(_self.reducida.elementos[j][i].toString())
+					if (!_self.reducida.elementos[j][i].equals(0)) {
+						console.log(_self.reducida.elementos[j][i].toString())
+						_self.reducida.cambiarReglon(i, j);
+						if (this.esCuadrada) {
+							_self.identidad.cambiarReglon(i, j);
+						}
+						tieneCero = true;
+						break;
 					}
-					if (!subReglon[subIndex].equals(0)) {
-						console.log(index, subIndex)
-						_self.cambiarReglon(reglon, subReglon);
-						return false;
-					}
-				});
+				}
+				if (tieneCero) {
+					i--;
+					continue;
+				}
 			}
-			// console.log(_self.toString());
-			var changes = _self.volverUno(index);
-			console.log(_self.toString(changes));
-			var changes2 = _self.columnaACero(index);
-			console.log(_self.toString(changes2));
-			if (changes2)
+			// console.log(_self.reducida.toString());
+			var changes = _self.reducida.volverUno(i);
+			console.log(_self.reducida.toString(changes));
+			if (changes) {
+				allChanges.push(changes)
+			}
+			var changes2 = _self.reducida.columnaACero(i);
+			console.log(_self.reducida.toString(changes2));
+			if (changes2) {
 				allChanges.push(changes2)
-		});
-		console.log(_self.toString());
+			}
+		};
+		console.log(_self.reducida.toString());
 
 		allChanges.forEach(function(ele) {
 			$.each(ele, function(index, matrix) {
 		    	$("#resultados").append(matrix.toHTML());
 			 })
 		});
+    	$("#resultados").append(this.reducida.toHTML());
+    	$("#resultados").append(this.identidad.toHTML());
 	}
 
 	this.columnaACero = function(reglon) {
 		var changes = {};
+		var invertChanges = {};
 		for (var i = 0; i < this.elementos.length; i++) {
 			if (i === reglon) {
 				continue;
 			}
 			var primeraEntrada = new fraccion(this.elementos[i][reglon].numerador, this.elementos[i][reglon].denominador);
-			var operacion = primeraEntrada.esNegativa() ? "sumar" : "restar" ;
+			if (primeraEntrada.equals(0))
+				continue;
+			var operacion = primeraEntrada.esNegativa() && !this.elementos[reglon][i].esNegativa() ? "sumar" : "restar" ;
+			console.log(operacion)
 			for (var j = 0; j < this.elementos[reglon].length; j++) {
-				if (primeraEntrada.esNegativa() && this.elementos[i][j].esNegativa()) {
-					this.elementos[i][j].multiplicar(-1);
+				if (this.elementos[reglon][j].equals(0)) {
+					continue;
 				}
-				this.elementos[i][j][operacion](PRODUCTO(primeraEntrada, this.elementos[reglon][j]));
+				var pigote = new fraccion(this.elementos[reglon][j].toString());
+				if (this.parent.esCuadrada) {
+					var pigoteIdentidad = new fraccion(this.parent.identidad.elementos[reglon][j].toString());
+				}
+				if (operacion === "sumar") {
+					pigote.multiplicar(-1);
+					if (this.esCuadrada) {
+						pigoteIdentidad.multiplicar(-1);
+					}
+				}
+				this.elementos[i][j][operacion](PRODUCTO(primeraEntrada, pigote));
+				if (this.parent.esCuadrada) {
+					this.parent.identidad.elementos[i][j][operacion](PRODUCTO(primeraEntrada, pigoteIdentidad));
+				}
 			}
-			var idChange = "R" + (i + 1) + "-> R" + (i + 1) + " - " + primeraEntrada.toString() + " * R" + (reglon + 1);
+			var idChange = "R" + (i + 1) + "-> R" + (i + 1) + " - (" + primeraEntrada.toString() + ") * R" + (reglon + 1);
 			changes[idChange] = new Matriz(this);
+			changes[idChange].setId(idChange);
+			idChange = "INVERSA (" + idChange + ")";
+			changes[idChange] = new Matriz(this.parent.identidad);
 			changes[idChange].setId(idChange);
 		}
 		return changes;

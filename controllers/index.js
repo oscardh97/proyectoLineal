@@ -19,9 +19,9 @@ var newMatrix = function() {
 	var newId = getNextChar();
 	console.log(newId)
 	matrices[newId] = new Matriz([
-		[1,2,3],
-	 	[4,5,6],
-	 	[7,8,9]
+		[1,-1,0],
+	 	[0,1,0],
+	 	[2,0,1]
 	], newId);
 	$("#originales").append(matrices[newId].toHTML());
 };
@@ -115,7 +115,11 @@ var proccesString = function(cadena) {
 		var multiplicaciones = ele.split("*");
 	   	if (multiplicaciones.length > 1) {
 	   		if (multiplicaciones[0].indexOf("TRANS") !== -1) {
-	   			_self.tieneTranspuesta(multiplicaciones[0]);
+	   			tieneTranspuesta(multiplicaciones[0]);
+	   		}
+	   		if (multiplicaciones[0].indexOf("REDUCIDA") !== -1) {
+	   			console.log("REST")
+	   			tieneReducidad(multiplicaciones[0]);
 	   		}
 	   		var totalMulti = matrices[multiplicaciones[0]];
          	multiplicaciones.forEach(function(multiplicacion, indexM) {
@@ -123,7 +127,10 @@ var proccesString = function(cadena) {
          			return;
          		}
 		   		if (multiplicacion.indexOf("TRANS") !== -1) {
-		   			_self.tieneTranspuesta(multiplicacion);
+		   			tieneTranspuesta(multiplicacion);
+		   		}
+		   		if (multiplicacion.indexOf("REDUCIDA") !== -1) {
+		   			tieneReducidad(multiplicacion);
 		   		}
 				totalMulti = MULTIPLICAR_MATRICES(totalMulti, matrices[multiplicacion]);
          	});
@@ -135,7 +142,10 @@ var proccesString = function(cadena) {
 	   	} else {
 	   		if (index === 0) {
 		   		if (multiplicaciones[0].indexOf("TRANS") !== -1) {
-		   			_self.tieneTranspuesta(multiplicaciones[0]);
+		   			tieneTranspuesta(multiplicaciones[0]);
+		   		}
+		   		if (multiplicaciones[0].indexOf("REDUCIDA") !== -1) {
+		   			tieneReducidad(multiplicaciones[0]);
 		   		}
 	   			total = matrices[multiplicaciones[0]];
 	   			console.log(total.toString())
@@ -146,6 +156,9 @@ var proccesString = function(cadena) {
 	   		if (testArray[index].indexOf("TRANS") !== -1) {
 	   			_self.tieneTranspuesta(testArray[index]);
 	   		}
+	   		if (testArray[index].indexOf("REDUCIDA") !== -1) {
+	   			tieneReducidad(testArray[index]);
+	   		}
 			total = SUMAR_MATRICES(total, matrices[testArray[index]]);
 		}
 		
@@ -154,16 +167,58 @@ var proccesString = function(cadena) {
 	return total;   
 }
 
-this.tieneTranspuesta = function(cadena) {
+// var tieneTranspuesta = function(cadena) {
+
+// 	if (cadena.indexOf("TRANS(") !== -1) {
+// 		var index = cadena.indexOf("TRANS(");
+// 		var newId = cadena.substring(index + 6, index + 7);
+// 		if (matrices.hasOwnProperty(newId)) {
+// 			matrices["TRANS(" + newId + ")"] = matrices[newId].transpuesta();
+// 			matrices["TRANS(" + newId + ")"].setId("TRANS(" + newId + ")");
+// 			$("#resultados").append(matrices["TRANS(" + newId + ")"].toHTML());
+// 		} else {
+// 			throw "NO EXISTE LA MATRIZ";
+// 		}
+// 	}
+// }
+
+var tieneTranspuesta = function(cadena) {
 
 	if (cadena.indexOf("TRANS(") !== -1) {
 		var index = cadena.indexOf("TRANS(");
-		var newId = cadena.substring(index + 6, index + 7);
+		var newId = cadena.substring(index + 6, index + cadena.indexOf(")"));
+		console.log(newId)
 		if (matrices.hasOwnProperty(newId)) {
 			matrices["TRANS(" + newId + ")"] = matrices[newId].transpuesta();
 			matrices["TRANS(" + newId + ")"].setId("TRANS(" + newId + ")");
 			$("#resultados").append(matrices["TRANS(" + newId + ")"].toHTML());
-		} else {
+		}
+		//  else if (newId.indexOf("TRANS") !== -1){
+		// 	tieneTranspuesta(newId + ")");
+		// 	tieneTranspuesta(cadena);
+		// } 
+		else {
+			throw "NO EXISTE LA MATRIZ";
+		}
+	}
+}
+var tieneReducidad = function(cadena) {
+
+	if (cadena.indexOf("REDUCIDA(") !== -1) {
+		var index = cadena.indexOf("REDUCIDA(");
+		var newId = cadena.substring(index + 9, index + cadena.indexOf(")"));
+		console.log(newId)
+		if (matrices.hasOwnProperty(newId)) {
+			matrices[newId].resolverSistema();
+			matrices["REDUCIDA(" + newId + ")"] = matrices[newId].reducida;
+			// matrices["REDUCIDA(" + newId + ")"].setId("REDUCIDA(" + newId + ")");
+			// $("#resultados").append(matrices["REDUCIDA(" + newId + ")"].toHTML());
+		}
+		//  else if (newId.indexOf("TRANS") !== -1){
+		// 	tieneTranspuesta(newId + ")");
+		// 	tieneTranspuesta(cadena);
+		// } 
+		else {
 			throw "NO EXISTE LA MATRIZ";
 		}
 	}

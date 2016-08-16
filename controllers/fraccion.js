@@ -86,6 +86,10 @@
 		}
 		
 		this.equals = function(n1) {
+			if (n1 === 0) {
+				return this.numerador === 0 || this.denominador === 0;
+			}
+
 			if (!isNaN(n1)) {
 				n1 = new fraccion(n1, 1);
 			}
